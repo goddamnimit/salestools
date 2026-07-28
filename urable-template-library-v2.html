@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Urable Sales Template Library</title>
+<style>
+  :root{
+    --ink:#1c2431;
+    --paper:#f6f7f4;
+    --card:#ffffff;
+    --line:#dfe3da;
+    --accent:#155e75;
+    --accent-soft:#e3f0f3;
+    --amber:#b45309;
+    --flag:#9aa3ad;
+    --mono:'SF Mono', ui-monospace, 'Cascadia Code', Menlo, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Avenir Next','Segoe UI',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5}
+  header{background:var(--ink);color:#fff;padding:24px 28px 20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  header h1{font-size:1.3rem;font-weight:600}
+  header p{color:#9fb3c8;font-size:.82rem;margin-top:4px}
+  .hdr-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .hdr-actions button{font:inherit;font-size:.78rem;padding:7px 13px;border-radius:7px;cursor:pointer;border:1px solid #3c4757;background:#2a3444;color:#e6edf5}
+  .hdr-actions button:hover{background:#374252}
+  .layout{display:flex;min-height:calc(100vh - 90px)}
+  nav{width:235px;flex-shrink:0;background:var(--card);border-right:1px solid var(--line);padding:16px 0;position:sticky;top:0;align-self:flex-start;max-height:100vh;overflow-y:auto}
+  nav button{display:block;width:100%;text-align:left;padding:9px 20px;border:none;background:none;cursor:pointer;font:inherit;font-size:.87rem;color:var(--ink);border-left:3px solid transparent}
+  nav button:hover{background:var(--accent-soft)}
+  nav button.active{border-left-color:var(--accent);background:var(--accent-soft);font-weight:600}
+  nav .count{color:#8b95a1;font-size:.74rem;margin-left:5px}
+  main{flex:1;padding:24px 30px;max-width:880px}
+  .toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+  .searchbar{flex:1;min-width:200px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:.9rem;background:var(--card)}
+  .toolbar label{display:flex;align-items:center;gap:6px;font-size:.82rem;color:#5b6470}
+  .cat-title{font-size:1.03rem;font-weight:700;margin:24px 0 4px}
+  .cat-desc{font-size:.81rem;color:#6b7480;margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:13px;overflow:hidden}
+  .card.flagged{opacity:.55}
+  .card.flagged .body{text-decoration:line-through;color:var(--flag)}
+  .card-head{display:flex;align-items:center;gap:10px;padding:11px 16px;cursor:pointer;user-select:none}
+  .card-head:hover{background:#fafbf8}
+  .chev{transition:transform .15s;font-size:.7rem;color:#8b95a1}
+  .card.open .chev{transform:rotate(90deg)}
+  .card-title{font-weight:600;font-size:.92rem;flex:1}
+  .edited-dot{font-size:.68rem;color:var(--accent);font-weight:600}
+  .tag{font-size:.67rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:var(--accent-soft);color:var(--accent)}
+  .tag.email{background:#fdf1e3;color:var(--amber)}
+  .tag.note{background:#eee;color:#666}
+  .card-body{display:none;border-top:1px solid var(--line)}
+  .card.open .card-body{display:block}
+  .body{white-space:pre-wrap;font-family:var(--mono);font-size:.82rem;padding:16px;line-height:1.6;color:#2b3442}
+  textarea.editor{width:calc(100% - 32px);margin:16px;font-family:var(--mono);font-size:.82rem;line-height:1.6;padding:12px;border:1px solid var(--accent);border-radius:8px;resize:vertical;min-height:150px;background:#fbfdfd}
+  input.title-editor{width:calc(100% - 32px);margin:16px 16px 0;font:inherit;font-weight:600;font-size:.92rem;padding:8px 10px;border:1px solid var(--line);border-radius:7px}
+  .actions{display:flex;gap:8px;padding:0 16px 14px;flex-wrap:wrap}
+  .actions button{font:inherit;font-size:.79rem;padding:6px 13px;border-radius:7px;cursor:pointer;border:1px solid var(--line);background:#fff}
+  .actions button:hover{background:#f2f3f0}
+  .btn-copy{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+  .btn-copy:hover{background:#0e4a5c}
+  .btn-copy.copied{background:#1a7f4f;border-color:#1a7f4f}
+  .btn-save{background:#1a7f4f;color:#fff;border-color:#1a7f4f;font-weight:600}
+  .btn-save:hover{background:#166b43}
+  .card.flagged .btn-flag{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .dup-note{font-size:.75rem;color:var(--amber);padding:12px 16px 0;font-style:italic}
+  .hidden{display:none!important}
+  .add-btn{display:block;width:100%;padding:11px;border:1px dashed var(--line);border-radius:10px;background:none;font:inherit;font-size:.84rem;color:#6b7480;cursor:pointer;margin-bottom:22px}
+  .add-btn:hover{background:#fff;border-color:var(--accent);color:var(--accent)}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:8px;font-size:.85rem;opacity:0;transition:opacity .25s;pointer-events:none;z-index:50}
+  .toast.show{opacity:1}
+  @media(max-width:720px){
+    .layout{flex-direction:column}
+    nav{width:100%;position:static;display:flex;flex-wrap:wrap;padding:8px;max-height:none;border-right:none;border-bottom:1px solid var(--line)}
+    nav button{width:auto;border-left:none;border-radius:20px;padding:6px 12px}
+    nav button.active{border-left:none}
+    main{padding:18px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Urable Sales Template Library</h1>
+    <p>Click to expand · Copy · Edit and save · Flag what you don't need</p>
+  </div>
+  <div class="hdr-actions">
+    <button id="export">Download backup</button>
+    <button id="import">Restore backup</button>
+    <button id="reset">Reset all changes</button>
+  </div>
+</header>
+<div class="layout">
+  <nav id="nav"></nav>
+  <main>
+    <div class="toolbar">
+      <input class="searchbar" id="search" type="search" placeholder="Search templates… (e.g. trial, demo, promo)">
+      <label><input type="checkbox" id="hideFlagged"> Hide flagged</label>
+    </div>
+    <div id="content"></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept="application/json" style="display:none">
+
+<script>
+const DEFAULTS = [
+{cat:"Demo Scheduling & Booking", desc:"Getting prospects onto the calendar.", items:[
+ {id:"fe-connect", t:"Front-End Call — Connected", ch:"text", b:`Hey, this is Nimit from Urable. Thanks for speaking with me earlier. Please use this link below to book a demo:\nhttps://calendly.com/chase-urable/30min\nI look forward to speaking with you on a demo soon!`},
+ {id:"fe-noanswer", t:"Front-End Call — No Answer", ch:"text", b:`Hey, this is Nimit from Urable. I'm sorry we were not able to connect today. I hope the free trial is going well. If you would like to reschedule a demo with me, please use this link below:\nhttps://calendly.com/chase-urable/30min\nI look forward to speaking with you on a demo soon!`},
+ {id:"resched-generic", t:"Reschedule Demo (generic)", ch:"text", dup:"Near-duplicate of \u201CFront-End Call — No Answer\u201D minus the apology line.", b:`Hey, this is Nimit from Urable. I hope the free trial is going well. If you would like to reschedule a demo with me, please use this link below:\nhttps://calendly.com/chase-urable/30min`},
+ {id:"recorded-demo", t:"Recorded Demo (busy season)", ch:"text", b:`Hey NAME, it's Nimit with Urable. I know it's the busy season so I have recorded a quick demo for you to watch at your own leisure -\nOnce you're able to take a look at it, let me know and we can talk about getting your trial setup!`},
+ {id:"rep-resched", t:"Rep-Initiated Reschedule (apology)", ch:"text", b:`I apologize for the inconvenience, but I am going to have to reschedule our Demo tomorrow [DATE] due to internal scheduling issues. Please use this link below to reschedule our demo for another time next week.\nhttps://calendly.com/chase-urable/30min\nAgain, I apologize for the inconvenience.\nBest,`},
+]},
+{cat:"Demo & Call Reminders", desc:"Confirmations and day-of nudges.", items:[
+ {id:"pre-demo", t:"Pre-Demo Confirmation", ch:"text", b:`Hi NAME, this is Nimit with Urable! I'm reaching out to confirm our demo scheduled for today at [TIME]. I'm excited to go over how Urable can help streamline your scheduling, payments, and client management!\nPlease respond \u201CC\u201D to confirm your appointment. See you soon`},
+ {id:"ob-confirm", t:"Onboarding Call Confirmation", ch:"text", dup:"Same structure as Pre-Demo Confirmation — consider keeping just one with a [CALL TYPE] placeholder.", b:`Hi NAME, this is Nimit with Urable! I'm reaching out to confirm your Onboarding Call scheduled for today at [TIME]. We are excited to go over how Urable can help streamline your business!\nPlease respond \u201CC\u201D to confirm your appointment. See you soon`},
+ {id:"waiting-demo", t:"In the Waiting Room (demo)", ch:"text", b:`Hey NAME, I am currently in the waiting room for our demo today. Please let me know if you need any assistance joining or rescheduling.`},
+ {id:"waiting-ob", t:"In the Waiting Room (onboarding)", ch:"text", dup:"Duplicate of the demo waiting-room text (\u201CI am\u201D \u2192 \u201CWe are\u201D). Likely only need one.", b:`Hey NAME, we are currently in the waiting room for our onboarding call today. Please let me know if you need any assistance joining or rescheduling.`},
+]},
+{cat:"Post-Demo Follow-Up", desc:"Sent right after a demo or setup call.", items:[
+ {id:"intrial-email", t:"In-Trial Demo Email", ch:"email", b:`Hi NAME,\n\nThanks so much for joining the call with me today! As I mentioned, here is the link for the free account setup service: [Free Account Set Up link].\n\nHere is the tutorial video on the Virtual Shop as well: Opening the Virtual Shop, Virtual Shop Preferences, Linking the Virtual Shop\n\nI look forward to speaking with you again soon, and if you have any questions at all, please don't hesitate to reach out to us.\n\nThanks,\nNimit`},
+ {id:"demo-fu-email", t:"Demo Follow-Up Email", ch:"email", b:`Hey NAME,\n\nThank you for meeting with me today! Here are tutorial videos on the Virtual Shop and more: Short Term Reminders, Job Process (Short), Importing Customers and Products/Services, Different Types of Invoices, UrPay\n\nHere is the link to book an Onboarding Call: [Urable Onboarding - Urable Team]\n\nI look forward to speaking with you again soon. If you have any questions, please don't hesitate to reach out to us.\n\nBest,\nNimit`},
+ {id:"demo-fu-text", t:"Demo Follow-Up Text", ch:"text", b:`Hey NAME! Nimit with Urable here - Thank you for meeting with me and exploring Urable during your 14 Day Free-Trial. Feel free to text or call with any questions that come up.`},
+ {id:"after-obs", t:"After Onboarding/Setup Call", ch:"text", dup:"This text appeared twice in the original doc — kept once here.", b:`Hey NAME! Nimit with Urable - I just saw you finished your setup call recently and wanted to check in. Feel free to text or call with any questions that come up, and have fun continuing to explore Urable in the meantime!`},
+ {id:"noshow-obs", t:"No-Show Onboarding Call", ch:"text", b:`Hey NAME! Nimit with Urable - I just saw you were not able to attend your setup call and wanted to see when you would like to reschedule. Feel free to text or call with any questions that come up, and have fun continuing to explore Urable in the meantime!`},
+]},
+{cat:"Trial Check-Ins", desc:"Touchpoints during the 14-day trial.", items:[
+ {id:"welcome", t:"Welcome / Day 1\u201310 Intro", ch:"text", b:`Hey there! Welcome to Urable :) I'm Nimit, and I'm here to help you figure this thing out!\n\nIf you'd like to become a Urable expert in 30 minutes or less, use this link to book a 1:1 video call with me: https://calendly.com/chase-urable/30min\n\nIf you'd rather figure things out on your own, be sure to use our Help Center (the \u201CMichael Scott\u201D button in the bottom right corner of your Urable screen) for our support chat and tutorial video library. Happy trialing!`},
+ {id:"day10", t:"10-Day Check-In", ch:"text", b:`Hey NAME! This is Nimit from Urable - I wanted to check in on your free trial. Feel free to text or call with any questions that come up, and have fun continuing to explore Urable in the meantime!`},
+ {id:"day18", t:"18-Day Check-In", ch:"text", b:`Hey there! Nimit with Urable here. You've been trialing with us for a little while now and I just wanted to check in - how has your experience been so far? Feel free to call or text with any questions/concerns, I'm happy to walk you through anything!`},
+ {id:"backend", t:"Back-End (Trial Ending Soon)", ch:"text", b:`Hey there! This is Nimit with Urable, I hope you're having a good week so far. I wanted to touch base with you quickly since you're nearing the end of your free trial with us. How has your experience been so far? I'd love to talk with you about our different plans to see which one is the right fit for you if you have a chance soon!`},
+]},
+{cat:"Account Setup", desc:"Getting the account built out.", items:[
+ {id:"setup-options", t:"Account Setup Options (two paths)", ch:"text", b:`There are two easy ways to get your Urable account set up and tailored to your business:\n\n1\uFE0F\u20E3 Join an Account Set Up Q&A — our Customer Success team will walk you through everything live:\n\uD83D\uDC49 https://calendly.com/urable/account-set-up-video-meeting (This is the direction I would recommend for you!)\n\n2\uFE0F\u20E3 Fill out the Free Account Setup Form — our team will build everything out for you within 24\u201348 hours and email you once it's ready:\n\uD83D\uDC49 https://docs.google.com/forms/d/e/1FAIpQLSclcpNj6FqCILbSUNKzPysHg72PoK5w1HkDOOuo4B8tzhnQZA/viewform\n\nWhichever works best for you! Excited to get you up and running!`},
+]},
+{cat:"Expiration & Reactivation", desc:"After the trial ends.", items:[
+ {id:"exp-outreach", t:"Just-Expired Outreach (extend offer)", ch:"text", b:`Hey, this is Nimit from Urable. Just tried giving you a call. I noticed your trial just expired. I'd love to help you make the most of what you already built. Want me to extend the trial for a few days while you test further?`},
+ {id:"exp-questions", t:"Just-Expired — Any Questions?", ch:"text", b:`Hey there! It's Nimit with Urable. Your 14 day Free-Trial subscription has recently expired. Did you have any last minute questions or anything that was holding you back? Please let me know if I can help in any way.`},
+ {id:"exp-final", t:"Final Thoughts Follow-Up (+ promo)", ch:"text", b:`Hey, it's Nimit with Urable. Just following up to see if you had any final thoughts on the platform now that your trial has ended… Happy to answer any questions you might have as you decide on next steps!\n\nAdditionally, we're running a summer promotion of 50% off your first month to get you kickstarted. If you want to jump on it, just let me know and I can activate it for you!`},
+ {id:"data-del-30", t:"Data Deletion Warning (30 days)", ch:"text", dup:"There's also a 14-day version below — the original doc gives both. Confirm which is correct and flag the other.", b:`Hey there! It's Nimit with Urable. Just wanted to give you a heads up! Your trial ended a little while ago, and we delete data 30 days after trial expiration. Did you want to chat about the subscription tiers we offer? If not I'll leave you alone, just wanted to be sure!`},
+ {id:"data-del-14", t:"Data Deletion Warning (14 days, + promo)", ch:"text", dup:"Conflicts with the 30-day version above — confirm the real policy.", b:`Hey! It's Nimit with Urable. Just wanted to give you a heads up! Your trial ended a bit ago, and we delete data 14 days after trial expiration. Did you want to chat about the subscription tiers we offer? If not I'll leave you alone, just wanted to be sure!\n\nI also wanted to remind you that we still have that limited time flash promo of 50% off your first month if you want to lock that in on your billing page, just let me know.`},
+ {id:"day35-email", t:"Day 35 — Reactivation Email (AE Touch #9)", ch:"email", b:`Hey NAME,\n\nIt's been about a week since your Urable trial ended.\n\nIf you haven't had a chance to see how powerful it can be for your shop, I'd love to help you pick up where you left off.\n\nYou can jump on our calendar anytime here:\nhttps://calendly.com/urable/account-set-up-video-meeting`},
+ {id:"walkthrough-nudge", t:"Walkthrough Nudge", ch:"text", b:`Hey, it's Nimit from Urable. If you haven't had a chance to jump on a walkthrough, let me know — I'd love to help you finish your setup.\nhttps://calendly.com/chase-urable/30min`},
+]},
+{cat:"Promos & Billing", desc:"Discount pushes and activation confirmations.", items:[
+ {id:"promo-intrial", t:"50% Promo — During Trial", ch:"text", b:`Hey, it's Nimit with Urable. I wanted to check in on your 14 day free trial. We are running a promo to help you get started this month. Lock in 50% OFF for your first month of subscription. To claim your discount, just respond to this text with \u201CC\u201D and visit your billing page.`},
+ {id:"promo-expired", t:"50% Promo — After Expiration", ch:"text", dup:"Same promo copy as the in-trial version with an \u201Cexpired\u201D opener — could merge.", b:`Hey NAME! It's Nimit with Urable. Just wanted to give you a heads up! Your free trial ended a little while ago, and we are running a promo to help you get started this month. Lock in 50% OFF for your first month of subscription. To claim your discount, just respond to this text with \u201CC\u201D and visit your billing page.`},
+ {id:"discount-activated", t:"Discount Activated", ch:"text", b:`Your discount has been activated. Please visit the billing page to view our payment options.`},
+ {id:"sub-activated", t:"Subscription Activated", ch:"text", b:`Hey NAME! I was able to activate your subscription. Please visit the billing page, and let me know if you have any questions.`},
+]},
+{cat:"Reference Notes (not templates)", desc:"General info from the doc — likely candidates to flag.", items:[
+ {id:"spanish", t:"Spanish Demos — Links", ch:"note", b:`Spanish onboarding Calendly:\nhttps://calendly.com/urable/urable-incorporacion\n\nDiscord reference:\nhttps://discord.com/channels/1175983530463989833/1414664578260013157/1475587320714362911`},
+]},
+];
+
+const KEY='urable-library-v2';
+let state = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {flags:{}, edits:{}, custom:[], deleted:[]};
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ toast('Could not save — browser storage is blocked here. Use Download backup.'); }
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._x); t._x=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function allCategories(){
+  const cats = DEFAULTS.map(c=>({cat:c.cat, desc:c.desc, items:c.items.filter(i=>!state.deleted.includes(i.id)).map(i=>{
+    const e = state.edits[i.id]||{};
+    return Object.assign({}, i, e, {_edited: !!(e.t||e.b)});
+  })}));
+  state.custom.forEach(ci=>{
+    const e = state.edits[ci.id]||{};
+    if(state.deleted.includes(ci.id)) return;
+    let target = cats.find(c=>c.cat===ci.cat);
+    if(!target){ target={cat:ci.cat, desc:"Your added templates.", items:[]}; cats.push(target); }
+    target.items.push(Object.assign({}, ci, e, {_custom:true, _edited: !!(e.t||e.b)}));
+  });
+  return cats;
+}
+
+const nav=document.getElementById('nav'), content=document.getElementById('content');
+
+function render(){
+  nav.innerHTML=''; content.innerHTML='';
+  const cats=allCategories();
+  cats.forEach((cat,ci)=>{
+    const nb=document.createElement('button');
+    nb.innerHTML=cat.cat+' <span class="count">'+cat.items.length+'</span>';
+    nb.onclick=()=>{ document.getElementById('cat-'+ci).scrollIntoView({behavior:'smooth'});
+      nav.querySelectorAll('button').forEach(b=>b.classList.remove('active')); nb.classList.add('active'); };
+    nav.appendChild(nb);
+
+    const h=document.createElement('h2'); h.className='cat-title'; h.id='cat-'+ci; h.textContent=cat.cat;
+    const d=document.createElement('p'); d.className='cat-desc'; d.textContent=cat.desc;
+    content.appendChild(h); content.appendChild(d);
+    cat.items.forEach(item=>content.appendChild(makeCard(item)));
+
+    const add=document.createElement('button');
+    add.className='add-btn'; add.textContent='+ Add a template to '+cat.cat;
+    add.onclick=()=>{
+      const id='custom-'+Date.now();
+      state.custom.push({id, cat:cat.cat, t:'New template', ch:'text', b:''});
+      save(); render();
+      setTimeout(()=>{
+        const el=document.querySelector('[data-id="'+id+'"]');
+        if(el){ el.classList.add('open'); el.scrollIntoView({behavior:'smooth',block:'center'}); el.querySelector('.btn-edit').click(); }
+      },50);
+    };
+    content.appendChild(add);
+  });
+  applyFilter();
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+function makeCard(item){
+  const card=document.createElement('div');
+  card.className='card'+(state.flags[item.id]?' flagged':'');
+  card.dataset.id=item.id;
+  card.dataset.search=(item.t+' '+item.b).toLowerCase();
+  card.innerHTML=`
+    <div class="card-head">
+      <span class="chev">\u25B6</span>
+      <span class="card-title">${esc(item.t)}</span>
+      ${item._edited?'<span class="edited-dot">edited</span>':''}
+      <span class="tag ${item.ch}">${item.ch}</span>
+    </div>
+    <div class="card-body">
+      ${item.dup?'<div class="dup-note">\u26A0\uFE0F '+item.dup+'</div>':''}
+      <div class="view">
+        <div class="body">${esc(item.b)}</div>
+        <div class="actions">
+          <button class="btn-copy">Copy template</button>
+          <button class="btn-edit">Edit</button>
+          <button class="btn-flag">${state.flags[item.id]?'Unflag':'Flag as not needed'}</button>
+          ${item._edited?'<button class="btn-revert">Revert to original</button>':''}
+          ${item._custom?'<button class="btn-delete">Delete</button>':''}
+        </div>
+      </div>
+      <div class="edit hidden">
+        <input class="title-editor" value="${esc(item.t).replace(/"/g,'&quot;')}">
+        <textarea class="editor">${esc(item.b)}</textarea>
+        <div class="actions">
+          <button class="btn-save">Save changes</button>
+          <button class="btn-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+
+  card.querySelector('.card-head').onclick=()=>card.classList.toggle('open');
+
+  const copyBtn=card.querySelector('.btn-copy');
+  copyBtn.onclick=async e=>{
+    e.stopPropagation();
+    const text=item.b;
+    try{ await navigator.clipboard.writeText(text); }
+    catch(err){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
+    copyBtn.textContent='Copied \u2713'; copyBtn.classList.add('copied');
+    setTimeout(()=>{copyBtn.textContent='Copy template';copyBtn.classList.remove('copied');},1500);
+  };
+
+  const view=card.querySelector('.view'), edit=card.querySelector('.edit');
+  card.querySelector('.btn-edit').onclick=e=>{ e.stopPropagation(); view.classList.add('hidden'); edit.classList.remove('hidden'); edit.querySelector('.editor').focus(); };
+  card.querySelector('.btn-cancel').onclick=e=>{ e.stopPropagation(); edit.classList.add('hidden'); view.classList.remove('hidden'); };
+  card.querySelector('.btn-save').onclick=e=>{
+    e.stopPropagation();
+    state.edits[item.id]={t:edit.querySelector('.title-editor').value, b:edit.querySelector('.editor').value};
+    save(); toast('Saved'); render();
+    const el=document.querySelector('[data-id="'+item.id+'"]'); if(el) el.classList.add('open');
+  };
+
+  const flagBtn=card.querySelector('.btn-flag');
+  flagBtn.onclick=e=>{
+    e.stopPropagation();
+    if(state.flags[item.id]) delete state.flags[item.id]; else state.flags[item.id]=true;
+    save();
+    card.classList.toggle('flagged', !!state.flags[item.id]);
+    flagBtn.textContent=state.flags[item.id]?'Unflag':'Flag as not needed';
+    applyFilter();
+  };
+
+  const rev=card.querySelector('.btn-revert');
+  if(rev) rev.onclick=e=>{ e.stopPropagation(); delete state.edits[item.id]; save(); toast('Reverted'); render(); };
+  const del=card.querySelector('.btn-delete');
+  if(del) del.onclick=e=>{
+    e.stopPropagation();
+    if(!confirm('Delete this template permanently?')) return;
+    state.custom=state.custom.filter(c=>c.id!==item.id); delete state.edits[item.id];
+    save(); render();
+  };
+  return card;
+}
+
+function applyFilter(){
+  const q=document.getElementById('search').value.trim().toLowerCase();
+  const hide=document.getElementById('hideFlagged').checked;
+  document.querySelectorAll('.card').forEach(c=>{
+    const flagged=c.classList.contains('flagged');
+    const match=!q||c.dataset.search.includes(q);
+    c.classList.toggle('hidden', !match || (hide&&flagged));
+  });
+  document.querySelectorAll('.cat-title').forEach(h=>{
+    let el=h.nextElementSibling, any=false;
+    while(el&&!el.classList.contains('cat-title')){
+      if(el.classList.contains('card')&&!el.classList.contains('hidden')) any=true;
+      el=el.nextElementSibling;
+    }
+    const show=any||!q;
+    h.classList.toggle('hidden',!show);
+    h.nextElementSibling.classList.toggle('hidden',!show);
+  });
+  document.querySelectorAll('.add-btn').forEach(b=>b.classList.toggle('hidden', !!q));
+}
+
+document.getElementById('search').oninput=applyFilter;
+document.getElementById('hideFlagged').onchange=applyFilter;
+
+document.getElementById('export').onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='urable-templates-backup.json';
+  a.click(); URL.revokeObjectURL(a.href);
+};
+document.getElementById('import').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange=ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      state={flags:d.flags||{}, edits:d.edits||{}, custom:d.custom||[], deleted:d.deleted||[]};
+      save(); render(); toast('Backup restored');
+    }catch(e){ toast('That file could not be read as a backup.'); }
+  };
+  r.readAsText(f); ev.target.value='';
+};
+document.getElementById('reset').onclick=()=>{
+  if(!confirm('This removes all your edits, flags, and added templates. Continue?')) return;
+  state={flags:{},edits:{},custom:[],deleted:[]}; save(); render(); toast('Reset to original');
+};
+
+render();
+</script>
+</body>
+</html>
